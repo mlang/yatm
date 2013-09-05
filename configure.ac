@@ -1,9 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(yatm.cc)
+AC_INIT([yatm], [0.6])
+AC_CONFIG_SRCDIR([yatm.cc])
 AC_CONFIG_AUX_DIR(config)
-dnl Every other copy of the package version number gets its value from here
-AM_INIT_AUTOMAKE(yatm, 0.6)
+AM_INIT_AUTOMAKE
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
 AM_CONFIG_HEADER(config.h)
