@@ -632,10 +632,6 @@ DSP_CFLAGS
 PKG_CONFIG_LIBDIR
 PKG_CONFIG_PATH
 PKG_CONFIG
-VORBISENC_LIBS
-VORBISFILE_LIBS
-VORBIS_LIBS
-VORBIS_CFLAGS
 OGG_LIBS
 OGG_CFLAGS
 AO_LIBS
@@ -750,10 +746,6 @@ with_ogg
 with_ogg_libraries
 with_ogg_includes
 enable_oggtest
-with_vorbis
-with_vorbis_libraries
-with_vorbis_includes
-enable_vorbistest
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1398,7 +1390,6 @@ Optional Features:
                           speeds up one-time build
   --disable-aotest       Do not try to compile and run a test ao program
   --disable-oggtest       Do not try to compile and run a test Ogg program
-  --disable-vorbistest    Do not try to compile and run a test Vorbis program
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1411,13 +1402,6 @@ Optional Packages:
                           Directory where libogg library is installed
                           (optional)
   --with-ogg-includes=DIR Directory where libogg header files are installed
-                          (optional)
-  --with-vorbis=PFX       Prefix where libvorbis is installed (optional)
-  --with-vorbis-libraries=DIR
-                          Directory where libvorbis library is installed
-                          (optional)
-  --with-vorbis-includes=DIR
-                          Directory where libvorbis header files are installed
                           (optional)
 
 Some influential environment variables:
@@ -4748,188 +4732,6 @@ rm -f core conftest.err conftest.$ac_objext \
   rm -f conf.oggtest
 
 
-# Check whether --with-vorbis was given.
-if test "${with_vorbis+set}" = set; then :
-  withval=$with_vorbis; vorbis_prefix="$withval"
-else
-  vorbis_prefix=""
-fi
-
-
-# Check whether --with-vorbis-libraries was given.
-if test "${with_vorbis_libraries+set}" = set; then :
-  withval=$with_vorbis_libraries; vorbis_libraries="$withval"
-else
-  vorbis_libraries=""
-fi
-
-
-# Check whether --with-vorbis-includes was given.
-if test "${with_vorbis_includes+set}" = set; then :
-  withval=$with_vorbis_includes; vorbis_includes="$withval"
-else
-  vorbis_includes=""
-fi
-
-# Check whether --enable-vorbistest was given.
-if test "${enable_vorbistest+set}" = set; then :
-  enableval=$enable_vorbistest;
-else
-  enable_vorbistest=yes
-fi
-
-
-  if test "x$vorbis_libraries" != "x" ; then
-    VORBIS_LIBS="-L$vorbis_libraries"
-  elif test "x$vorbis_prefix" = "xno" || test "x$vorbis_prefix" = "xyes" ; then
-    VORBIS_LIBS=""
-  elif test "x$vorbis_prefix" != "x" ; then
-    VORBIS_LIBS="-L$vorbis_prefix/lib"
-  elif test "x$prefix" != "xNONE"; then
-    VORBIS_LIBS="-L$prefix/lib"
-  fi
-
-  if test "x$vorbis_prefix" != "xno" ; then
-    VORBIS_LIBS="$VORBIS_LIBS -lvorbis -lm"
-  fi
-  VORBISFILE_LIBS="-lvorbisfile"
-  VORBISENC_LIBS="-lvorbisenc"
-
-  if test "x$vorbis_includes" != "x" ; then
-    VORBIS_CFLAGS="-I$vorbis_includes"
-  elif test "x$vorbis_prefix" = "xno" || test "x$vorbis_prefix" = "xyes" ; then
-    VORBIS_CFLAGS=""
-  elif test "x$vorbis_prefix" != "x" ; then
-    VORBIS_CFLAGS="-I$vorbis_prefix/include"
-  elif test "x$prefix" != "xNONE"; then
-    VORBIS_CFLAGS="-I$prefix/include"
-  fi
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Vorbis" >&5
-$as_echo_n "checking for Vorbis... " >&6; }
-  if test "x$vorbis_prefix" = "xno" ; then
-    no_vorbis="disabled"
-    enable_vorbistest="no"
-  else
-    no_vorbis=""
-  fi
-
-
-  if test "x$enable_vorbistest" = "xyes" ; then
-    ac_save_CFLAGS="$CFLAGS"
-    ac_save_LIBS="$LIBS"
-    CFLAGS="$CFLAGS $VORBIS_CFLAGS $OGG_CFLAGS"
-    LIBS="$LIBS $VORBIS_LIBS $VORBISENC_LIBS $OGG_LIBS"
-      rm -f conf.vorbistest
-      if test "$cross_compiling" = yes; then :
-  echo $ac_n "cross compiling; assumed OK... $ac_c"
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <vorbis/codec.h>
-#include <vorbis/vorbisenc.h>
-
-int main ()
-{
-    vorbis_block 	vb;
-    vorbis_dsp_state	vd;
-    vorbis_info		vi;
-
-    vorbis_info_init (&vi);
-    vorbis_encode_init (&vi, 2, 44100, -1, 128000, -1);
-    vorbis_analysis_init (&vd, &vi);
-    vorbis_block_init (&vd, &vb);
-    /* this function was added in 1.0rc3, so this is what we're testing for */
-    vorbis_bitrate_addblock (&vb);
-
-    system("touch conf.vorbistest");
-    return 0;
-}
-
-
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-
-else
-  no_vorbis=yes
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-       CFLAGS="$ac_save_CFLAGS"
-       LIBS="$ac_save_LIBS"
-  fi
-
-  if test "x$no_vorbis" = "xdisabled" ; then
-     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-     as_fn_error $? "Vorbis needed!" "$LINENO" 5
-  elif test "x$no_vorbis" = "x" ; then
-     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-     :
-  else
-     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-     if test -f conf.vorbistest ; then
-       :
-     else
-       echo "*** Could not run Vorbis test program, checking why..."
-       CFLAGS="$CFLAGS $VORBIS_CFLAGS"
-       LIBS="$LIBS $VORBIS_LIBS $OGG_LIBS"
-       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <stdio.h>
-#include <vorbis/codec.h>
-
-int
-main ()
-{
- return 0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-   echo "*** The test program compiled, but did not run. This usually means"
-       echo "*** that the run-time linker is not finding Vorbis or finding the wrong"
-       echo "*** version of Vorbis. If it is not finding Vorbis, you'll need to set your"
-       echo "*** LD_LIBRARY_PATH environment variable, or edit /etc/ld.so.conf to point"
-       echo "*** to the installed location  Also, make sure you have run ldconfig if that"
-       echo "*** is required on your system"
-       echo "***"
-       echo "*** If you have an old version installed, it is best to remove it, although"
-       echo "*** you may also be able to get things to work by modifying LD_LIBRARY_PATH"
-else
-   echo "*** The test program failed to compile or link. See the file config.log for the"
-       echo "*** exact error that occured. This usually means Vorbis was incorrectly installed"
-       echo "*** or that you have moved Vorbis since it was installed."
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-       CFLAGS="$ac_save_CFLAGS"
-       LIBS="$ac_save_LIBS"
-     fi
-     VORBIS_CFLAGS=""
-     VORBIS_LIBS=""
-     VORBISFILE_LIBS=""
-     VORBISENC_LIBS=""
-     as_fn_error $? "Vorbis needed!" "$LINENO" 5
-  fi
-
-
-
-
-  rm -f conf.vorbistest
-
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SLang_init_tty in -lslang" >&5
 $as_echo_n "checking for SLang_init_tty in -lslang... " >&6; }
 if ${ac_cv_lib_slang_SLang_init_tty+:} false; then :
@@ -5106,12 +4908,12 @@ if test -n "$DSP_CFLAGS"; then
     pkg_cv_DSP_CFLAGS="$DSP_CFLAGS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"mad sndfile\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "mad sndfile") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"mad sndfile >= 1.0.18\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "mad sndfile >= 1.0.18") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_DSP_CFLAGS=`$PKG_CONFIG --cflags "mad sndfile" 2>/dev/null`
+  pkg_cv_DSP_CFLAGS=`$PKG_CONFIG --cflags "mad sndfile >= 1.0.18" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -5123,12 +4925,12 @@ if test -n "$DSP_LIBS"; then
     pkg_cv_DSP_LIBS="$DSP_LIBS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"mad sndfile\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "mad sndfile") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"mad sndfile >= 1.0.18\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "mad sndfile >= 1.0.18") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_DSP_LIBS=`$PKG_CONFIG --libs "mad sndfile" 2>/dev/null`
+  pkg_cv_DSP_LIBS=`$PKG_CONFIG --libs "mad sndfile >= 1.0.18" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -5149,14 +4951,14 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        DSP_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "mad sndfile" 2>&1`
+	        DSP_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "mad sndfile >= 1.0.18" 2>&1`
         else
-	        DSP_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "mad sndfile" 2>&1`
+	        DSP_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "mad sndfile >= 1.0.18" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$DSP_PKG_ERRORS" >&5
 
-	as_fn_error $? "Package requirements (mad sndfile) were not met:
+	as_fn_error $? "Package requirements (mad sndfile >= 1.0.18) were not met:
 
 $DSP_PKG_ERRORS
 

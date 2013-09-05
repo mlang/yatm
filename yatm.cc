@@ -36,8 +36,6 @@
 #include <speex/speex_callbacks.h>
 #include <speex/speex_header.h>
 #include <speex/speex_stereo.h>
-#include <vorbis/codec.h>
-#include <vorbis/vorbisfile.h>
 #include <soundtouch/SoundTouch.h>
 #include <ao/ao.h>
 
@@ -167,7 +165,6 @@ play_ao (int channels, int bufsize)
 }
 
 static void print_version();
-static int play_vorbis(int fd, const char *begin);
 static int play_speex(int fd, char *begin);
 static int play_sndfile (int fd, char const *begin, char const *end);
 static int play_mpeg(int fd, char *begin, char *end);
@@ -268,9 +265,8 @@ main (int argc, char *argv[])
     st->setPitch(powf(2.,pitchCentDelta/1200.));
     st->setTempo(tempo);
     if (!play_sndfile(fd, begin_time, end_time))
-      if (!play_vorbis(fd, begin_time))
-	if (!play_speex(fd, begin_time))
-	  play_mpeg(fd, begin_time, end_time);
+      if (!play_speex(fd, begin_time))
+	play_mpeg(fd, begin_time, end_time);
 
     if (begin_time) free(begin_time);
     if (end_time) free(end_time);
@@ -653,108 +649,6 @@ static void
 print_version()
 {
   fprintf(stderr, "YATM " VERSION "\n");
-}
-
-static int
-play_vorbis(int fd, const char *begin)
-{
-  FILE *stream;
-  OggVorbis_File vf;
-  vorbis_info *vi;
-  int current_section; /* An Ogg bitstream can have multiple sections */
-  int inSamples;
-  int eof = 0;
-  
-  stream = fdopen(dup(fd), "rb");
-  if(ov_open(stream, &vf, NULL, 0) < 0) {
-    fprintf(stderr,"Input does not appear to be an Ogg bitstream.\n");
-    rewind(stream);
-    fclose(stream);
-    return 0;
-  }
-  if ((vi = ov_info(&vf,-1)) == NULL) {
-    fprintf(stderr, "Unable to get Vorbis info\n");
-    ov_clear(&vf);
-    return 0;
-  }
-  fprintf(stderr, "Vorbis stream has %d channels and %dhz sampling rate.\n",
-	  vi->channels, vi->rate);
-  if (begin) {
-    double time;
-    int ret;
-    if (!ov_seekable(&vf)) {
-      fprintf(stderr, "Stream not seekable, sorry\n");
-    } else {
-      if (parse_double_time(&time, begin) == -1) {
-	fprintf(stderr, "Unable to parse time spec: %s\n", begin);
-	ov_clear(&vf);
-	fclose(stream);
-	return 1;
-      }
-      ret = ov_time_seek(&vf, time);
-      if (ret < 0) {
-	fprintf(stderr, "Unable to seek to position %f (error %d)\n",
-		time, ret);
-      }
-    }
-  }
-  audio_format.bits = 16;
-  audio_format.channels = vi->channels;
-  audio_format.rate = vi->rate;
-  audio_format.byte_format = AO_FMT_LITTLE;
-  if (audio_device) {
-    fprintf(stderr, "Audio device already open.\n");
-    ov_clear(&vf);
-    fclose(stream);
-    return 0;
-  }
-  audio_device = ao_open_live(audio_driver, &audio_format, NULL);
-  if (!audio_device) {
-    fprintf(stderr, "Error opening audio device: %d.\n", errno);
-    ov_clear(&vf);
-    fclose(stream);
-    return 0;
-  }
-  st->setSampleRate(vi->rate);
-  st->setChannels(vi->channels);
-
-  while (!eof) {
-    float **pcm;
-
-    pollKeyboard(NULL);
-    if (quit) goto close;
-    inSamples = ov_read_float(&vf, &pcm, 4096, &current_section);
-    if (inSamples == 0) {
-      eof = 1;
-    } else if (inSamples < 0) {
-      fprintf(stderr, "ov_read_float: %d\n", inSamples);
-    } else {
-      soundtouch::SAMPLETYPE samples[vi->channels * inSamples];
-      soundtouch::SAMPLETYPE *ptr = samples;
-      float *ch1 = pcm[0], *ch2 = pcm[1];
-
-      for (int i = 0; i < inSamples; i++) {
-        soundtouch::SAMPLETYPE val;
-	val = *ch1++*32768.f;
-	if (val > 32767) val = 32767;
-	else if (val < -32768) val = -32768;
-	*ptr++ = val;
-	if (vi->channels == 2) {
-	  val = *ch2++*32768.f;
-	  if (val > 32767) val = 32767;
-	  else if (val < -32768) val = -32768;
-	  *ptr++ = val;
-	}
-      }
-      st->putSamples(samples, inSamples);
-      play_ao(vi->channels, inSamples);
-    }
-  }
- close:
-  ao_close(audio_device);
-  ov_clear(&vf);
-  fclose(stream);
-  return 1;
 }
 
 static int
