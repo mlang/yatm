@@ -169,7 +169,7 @@ play_ao (int channels, int bufsize)
 static void print_version();
 static int play_vorbis(int fd, const char *begin);
 static int play_speex(int fd, char *begin);
-static int play_sndfile (int fd, char *begin);
+static int play_sndfile (int fd, char const *begin, char const *end);
 static int play_mpeg(int fd, char *begin, char *end);
 
 int
@@ -267,7 +267,7 @@ main (int argc, char *argv[])
     st->setSetting(SETTING_USE_AA_FILTER, 1);
     st->setPitch(powf(2.,pitchCentDelta/1200.));
     st->setTempo(tempo);
-    if (!play_sndfile(fd, begin_time))
+    if (!play_sndfile(fd, begin_time, end_time))
       if (!play_vorbis(fd, begin_time))
 	if (!play_speex(fd, begin_time))
 	  play_mpeg(fd, begin_time, end_time);
@@ -717,6 +717,7 @@ play_vorbis(int fd, const char *begin)
   }
   st->setSampleRate(vi->rate);
   st->setChannels(vi->channels);
+
   while (!eof) {
     float **pcm;
 
@@ -728,8 +729,8 @@ play_vorbis(int fd, const char *begin)
     } else if (inSamples < 0) {
       fprintf(stderr, "ov_read_float: %d\n", inSamples);
     } else {
-      SAMPLETYPE samples[vi->channels * inSamples];
-      SAMPLETYPE *ptr = samples;
+      soundtouch::SAMPLETYPE samples[vi->channels * inSamples];
+      soundtouch::SAMPLETYPE *ptr = samples;
       float *ch1 = pcm[0], *ch2 = pcm[1];
 
       for (int i = 0; i < inSamples; i++) {
@@ -964,8 +965,9 @@ seek_sndfile (float delta)
 }
 
 static int
-play_sndfile (int fd, char *begin)
+play_sndfile (int fd, char const *begin, char const *end)
 {
+  sf_count_t maxFrames = 0;
   memset (&sfinfo, 0, sizeof (sfinfo));
   if ((sndfile = sf_open_fd (dup(fd), SFM_READ, &sfinfo, TRUE))) {
     if (begin) {
@@ -975,6 +977,14 @@ play_sndfile (int fd, char *begin)
 	goto close;
       }
       sf_seek(sndfile, (sf_count_t)(time * sfinfo.samplerate), SEEK_SET);
+    }
+    if (end) {
+      double time;
+      if (parse_double_time(&time, end) == -1) {
+        fprintf(stderr, "Unable to parse end time spec: %s\n", end);
+        goto close;
+      }
+      maxFrames = (sf_count_t)(time * sfinfo.samplerate);
     }
     audio_format.bits = 16;
     audio_format.channels = sfinfo.channels;
@@ -996,13 +1006,16 @@ play_sndfile (int fd, char *begin)
     {
       float buf[512 * sfinfo.channels];
       sf_count_t nFrames;
-      while ((nFrames = sf_readf_float(sndfile, buf, 512)) > 0) {
+      sf_count_t readFrames = 0;
+      while ((nFrames = sf_readf_float(sndfile, buf, 512)) > 0 && readFrames < maxFrames) {
+	if (readFrames + nFrames > maxFrames) nFrames = maxFrames - readFrames;
 	SAMPLETYPE samples[nFrames * sfinfo.channels];
 	int i;
 	for (i=0; i<nFrames*sfinfo.channels; i++) {
 	  samples[i] = buf[i]*32700.0;
 	}
 	st->putSamples(samples, nFrames);
+        readFrames += nFrames;
 	play_ao(sfinfo.channels, nFrames);
 	pollKeyboard(seek_sndfile);
 	if (quit) goto close;
