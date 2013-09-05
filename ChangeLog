@@ -1,0 +1,101 @@
+2007-11-26  Mario Lang  <mlang@delysid.org>
+
+	* configure.in: Change version to 0.6.
+
+2006-01-24  Mario Lang  <mlang@delysid.org>
+
+	* configure.in: Increment version to 0.5.
+	* Makefile.am: Link with -lslang.
+	* yatm.cc: Redo keyboard input using libslang.
+	Eliminate duplicated code.
+	Add seeking (cursor left/right) for libsndfile backed files.
+	Add command-line args -c (cents) and -s (semitones) for
+	pitch transposition.
+	Add realtime transposition change keys ('s' and 'S' for
+	semitones and 'c' and 'C' for cents).
+	
+2005-11-05  Mario Lang  <mlang@delysid.org>
+
+	* README: Updated.
+
+	* configure.in: Go to version 0.4.
+
+	* yatm.cc: Added pause (SPC) key for MPEG decoder.
+	Added libsndfile support.
+
+2005-08-22  Mario Lang  <mlang@delysid.org>
+
+	* configure.in: Bump version to 0.3
+
+	* yatm.cc: G++ 4.0 fixes (stupid namespace garbage)
+
+2005-03-18  Mario Lang  <mlang@delysid.org>
+
+	* configure.in: Drop PKG_CONFIG check for libSoundTouch
+	for now since latest libsoundtouch1-dev in Debian does not provide
+	a .pc file anymore.
+
+	* yatm.cc: Convert to use soundtouch::SAMPLETYPE to be compatible
+	with latest libSoundTouch.
+
+2004-06-11  Mario Lang  <mlang@delysid.org>
+
+	* configure.in: Bump version to 0.2.3.
+
+	* yatm.cc (play_vorbis): If we don't multiply the second
+	channel by the same value, stereo playback is obviously broken, doh!
+
+	* configure.in: Bump version number to 0.2.2 and release.
+
+	* yatm.cc (play_speex): Add support for begin time seeking by
+	decoding the stream, but ignoring sample output until
+	total_samples >= skip_samples.
+
+2004-06-10  Mario Lang  <mlang@delysid.org>
+
+	* yatm.cc (play_speex): Move tty command handling deeper into
+	the loop to make it more responsive.
+	(play_speex): Use enhance_mode (whatever that does.)
+	(play_vorbis): Renamed from play_ogg.
+	(play_vorbis): Use the new play_ao function (same as with speex).
+	(play_speex): Add comments/printf about the strange speex_decode_stereo
+	bugs.
+	(play_vorbis): Add support for seeking to a specific position
+	(argument -b).  Timed playback (-e) not yet done.
+	(play_mpeg): Parse mad_time here, not in main().
+
+	* configure.in: Bump version to 0.2.1 and release this.
+
+	* README: Updated.
+
+	* yatm.cc (play_speex): New function, implementing the Speex codec.
+	No seeking yet, but at least it appears to work fine.
+	
+2004-06-09  Mario Lang  <mlang@delysid.org>
+
+	* configure.in: Bump version number to 0.2.
+
+	* yatm.1: Update about Vorbis, and add info about the 'q' key.
+
+	* yatm.cc: Add support for Vorbis audio files.
+	No support for seeking or timed playback yet.
+
+2004-06-08  Mario Lang  <mlang@delysid.org>
+
+	* yatm.1: Update for -b and -e.
+
+	* yatm.cc (print_version): Make -V actually work by including
+	config.h and using the VERSION macro.
+	(main): New options -b and -e.
+
+	* configure.in: Bump version to 0.1.1.
+
+	* yatm.1: Tell the user about interactive controls.
+
+	* yatm.cc: Add interactive tempo controls.  For now, the keys
+	'+' and '-' adjust the playback speed.
+
+2004-06-07  Mario Lang  <mlang@delysid.org>
+
+	* yatm: initial version.
+
