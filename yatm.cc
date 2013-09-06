@@ -1,6 +1,6 @@
 /*
  * yatm - Yet Another Time Machine
- * Copyright (C) 2004, 2005, 2006 Mario Lang
+ * Copyright (C) 2004, 2005, 2006, 2013 Mario Lang
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,8 @@
 #include <speex/speex_stereo.h>
 #include <soundtouch/SoundTouch.h>
 #include <ao/ao.h>
+
+#include <iostream>
 
 #include "config.h"
 
@@ -210,71 +212,69 @@ main (int argc, char *argv[])
     input_file = strdup(argv[optind++]);
   }
   if (optind < argc) {
-    fprintf(stderr, "Excessive command line paramters, aborting...\n");
-    return 1;
+    std::cout << "Excessive command line paramters, aborting..." << std::endl;
+    exit(EXIT_FAILURE);
   }
   if (!input_file) {
-    fprintf(stderr, "No input file specified, aborting...\n");
+    std::cout << "No input file specified, aborting..." << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
+  st = new SoundTouch();
+
+  struct sigaction action;
+
+  int fd = open(input_file, O_RDONLY);
+  if (fd == -1) {
+    fprintf(stderr, "Can not open %s: %s, aborting...\n", input_file, strerror(errno));
+    exit(EXIT_FAILURE);
+  }
+
+  ao_initialize();
+  audio_driver = ao_default_driver_id();
+
+  if (sigaction(SIGTSTP, 0, &save_sigtstp) == -1) {
+    fprintf(stderr, "Error saving sigtstp handler.\n");
+    exit(EXIT_FAILURE);
+  }
+  if (sigaction(SIGINT, 0, &save_sigint) == -1) {
+    fprintf(stderr, "Error saving sigint handler.\n");
     return 1;
-  } else {
-    int fd;
-
-    st = new SoundTouch();
-
-    struct sigaction action;
-
-    fd = open(input_file, O_RDONLY);
-    if (fd == -1) {
-      fprintf(stderr, "Can not open %s: %s, aborting...\n", input_file, strerror(errno));
-      return 1;
-    }
-
-    ao_initialize();
-    audio_driver = ao_default_driver_id();
-
-    if (sigaction(SIGTSTP, 0, &save_sigtstp) == -1) {
-      fprintf(stderr, "Error saving sigtstp handler.\n");
-      return 1;
-    }
-    if (sigaction(SIGINT, 0, &save_sigint) == -1) {
-      fprintf(stderr, "Error saving sigint handler.\n");
-      return 1;
-    }
-    action = save_sigtstp;
-    action.sa_handler = signal_handler;
-    sigemptyset(&action.sa_mask);
-    sigaddset(&action.sa_mask, SIGINT);
-    action.sa_flags = 0;
-    if (sigaction(SIGTSTP, &action, 0) == -1) {
-      fprintf(stderr, "Error setting sigtstp handler.\n");
-      return 0;
-    }
-    action = save_sigint;
-    action.sa_handler = signal_handler;
-    sigemptyset(&action.sa_mask);
-    sigaddset(&action.sa_mask, SIGTSTP);
-    action.sa_flags = 0;
-    if (sigaction(SIGTSTP, &action, 0) == -1) {
-      fprintf(stderr, "Error setting sigtstp handler.\n");
-      return 0;
-    }
-
-    initTTY();
-    st->setSetting(SETTING_USE_QUICKSEEK, 0);
-    st->setSetting(SETTING_USE_AA_FILTER, 1);
-    st->setPitch(powf(2.,pitchCentDelta/1200.));
-    st->setTempo(tempo);
-    if (!play_sndfile(fd, begin_time, end_time))
-      if (!play_speex(fd, begin_time))
-	play_mpeg(fd, begin_time, end_time);
-
-    if (begin_time) free(begin_time);
-    if (end_time) free(end_time);
-    close(fd);
-    delete st;
-    SLang_reset_tty();
+  }
+  action = save_sigtstp;
+  action.sa_handler = signal_handler;
+  sigemptyset(&action.sa_mask);
+  sigaddset(&action.sa_mask, SIGINT);
+  action.sa_flags = 0;
+  if (sigaction(SIGTSTP, &action, 0) == -1) {
+    fprintf(stderr, "Error setting sigtstp handler.\n");
     return 0;
   }
+  action = save_sigint;
+  action.sa_handler = signal_handler;
+  sigemptyset(&action.sa_mask);
+  sigaddset(&action.sa_mask, SIGTSTP);
+  action.sa_flags = 0;
+  if (sigaction(SIGTSTP, &action, 0) == -1) {
+    fprintf(stderr, "Error setting sigtstp handler.\n");
+    return 0;
+  }
+
+  initTTY();
+  st->setSetting(SETTING_USE_QUICKSEEK, 0);
+  st->setSetting(SETTING_USE_AA_FILTER, 1);
+  st->setPitch(powf(2.,pitchCentDelta/1200.));
+  st->setTempo(tempo);
+  if (!play_sndfile(fd, begin_time, end_time))
+    if (!play_speex(fd, begin_time))
+      play_mpeg(fd, begin_time, end_time);
+
+  if (begin_time) free(begin_time);
+  if (end_time) free(end_time);
+  close(fd);
+  delete st;
+  SLang_reset_tty();
+  return EXIT_SUCCESS;
 }
 
 /* MPEG */
@@ -591,7 +591,7 @@ parse_double_time (double *timer, char const *str)
   unsigned long seconds, fraction, fracpart;
   int minus;
 
-  while (isspace((unsigned char) *str)) ++str;
+  while (isspace(*str)) ++str;
   do {
     seconds = fraction = fracpart = 0;
 
@@ -635,7 +635,7 @@ parse_double_time (double *timer, char const *str)
     accum += time;
   } while (*str == '-' || *str == '+');
 
-  while (isspace((unsigned char) *str)) ++str;
+  while (isspace(*str)) ++str;
 
   if (*str != 0)
     return -1;
