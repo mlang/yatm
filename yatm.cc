@@ -648,7 +648,7 @@ parse_double_time (double *timer, char const *str)
 static void
 print_version()
 {
-  fprintf(stderr, "YATM " VERSION "\n");
+  fprintf(stderr, "YATM " YATM_VERSION "\n");
 }
 
 static int
