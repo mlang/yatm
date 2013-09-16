@@ -1,4 +1,4 @@
-yatm (0.7-1) unstable; urgency=low
+yatm (0.8-1) unstable; urgency=low
 
   * New upstream release (Closes: Bug#611530, Bug#697947, Bug#704894).
   * Replace cdbs with debhelper.
