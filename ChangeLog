@@ -1,3 +1,9 @@
+2013-09-06  Mario Lang  <mlang@delysid.org>
+
+	* yatm.cc: Honor -e when playing via libsndfile.
+	Eliminate Vorbis playback support as it is done by libsndfile now.
+	* CMakeLists.txt: Switched to CMake as build system, dropped autotools.
+
 2007-11-26  Mario Lang  <mlang@delysid.org>
 
 	* configure.in: Change version to 0.6.
