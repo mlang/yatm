@@ -1,0 +1,13 @@
+yatm (0.6-2) UNRELEASED; urgency=low
+
+  * New upstream release (Closes: Bug#611530, Bug#697947, Bug#704894).
+  * Replace cdbs with debhelper.
+
+ -- Mario Lang <mlang@debian.org>  Mon, 16 Sep 2013 18:48:44 +0200
+
+yatm (0.6-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Mario Lang <mlang@debian.org>  Wed, 25 Nov 2007 21:40:59 +0200
+
