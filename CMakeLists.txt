@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(YATM CXX)
 set(YATM_MAJOR_VERSION 0)
-set(YATM_MINOR_VERSION 6)
+set(YATM_MINOR_VERSION 8)
 set(YATM_VERSION ${YATM_MAJOR_VERSION}.${YATM_MINOR_VERSION})
 find_package(PkgConfig REQUIRED)
 pkg_search_module(AO REQUIRED ao)
