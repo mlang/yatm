@@ -1,3 +1,13 @@
+yatm (0.8-2) unstable; urgency=low
+
+  * Build-Depend on libsoundtouch-dev, instead of libsoundtouch0-dev
+    (Closes: Bug#793071).
+  * Use source format "3.0 (quilt)".
+  * Use debhelper 9.
+  * Update Standards-Version to 3.9.6.
+
+ -- Mario Lang <mlang@debian.org>  Tue, 21 Jul 2015 11:45:06 +0200
+
 yatm (0.8-1) unstable; urgency=low
 
   * New upstream release (Closes: Bug#611530, Bug#697947, Bug#704894).

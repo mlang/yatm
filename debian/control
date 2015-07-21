@@ -3,15 +3,15 @@ Section: sound
 Priority: optional
 Vcs-Git: git://github.com/mlang/yatm.git
 Maintainer: Mario Lang <mlang@debian.org>
-Build-Depends: debhelper (>= 8),
+Build-Depends: debhelper (>= 9),
                cmake,
                libspeex-dev,
                libmad0-dev,
                libsndfile1-dev,
                libao-dev,
-               libsoundtouch0-dev,
+               libsoundtouch-dev,
                libslang2-dev
-Standards-Version: 3.9.4
+Standards-Version: 3.9.6
 
 Package: yatm
 Architecture: any
