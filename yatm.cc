@@ -863,7 +863,7 @@ play_sndfile (int fd, char const *begin, char const *end)
 {
   sf_count_t maxFrames = 0;
   memset (&sfinfo, 0, sizeof (sfinfo));
-  if ((sndfile = sf_open_fd (dup(fd), SFM_READ, &sfinfo, TRUE))) {
+  if ((sndfile = sf_open_fd (dup(fd), SFM_READ, &sfinfo, 1))) {
     if (begin) {
       double time;
       if (parse_double_time(&time, begin) == -1) {
