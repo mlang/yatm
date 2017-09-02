@@ -212,7 +212,7 @@ main (int argc, char *argv[])
     input_file = strdup(argv[optind++]);
   }
   if (optind < argc) {
-    std::cout << "Excessive command line paramters, aborting..." << std::endl;
+    std::cout << "Excessive command line parameters, aborting..." << std::endl;
     exit(EXIT_FAILURE);
   }
   if (!input_file) {
