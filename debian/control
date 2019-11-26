@@ -1,7 +1,7 @@
 Source: yatm
 Section: sound
 Priority: optional
-Vcs-Git: git://github.com/mlang/yatm.git
+Vcs-Git: https://github.com/mlang/yatm.git
 Maintainer: Mario Lang <mlang@debian.org>
 Build-Depends: debhelper-compat (= 12),
                cmake,
